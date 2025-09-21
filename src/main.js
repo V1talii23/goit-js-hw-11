@@ -18,40 +18,44 @@ function formSubmit(e) {
 
   const query = String(e.target.elements['search-text'].value.trim());
   if (!query) {
-    return iziToast.error(
-      {
-        icon: '',
-        position: 'topRight',
-        message: `Pleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaase, do not try to enter "${query}", i know how to use trim()!`,
-        timeout: 5000,
-        progressBar: false,
-        close: false,
-        messageColor: 'white',
-      },
-      clearGallery()
-    );
+    return iziToast.error({
+      icon: '',
+      position: 'topRight',
+      message: 'Please, enter your search query!',
+      timeout: 5000,
+      progressBar: false,
+      close: false,
+      messageColor: 'white',
+    });
   }
 
-  clearGallery();
   showLoader();
-
   getImagesByQuery(query)
     .then(res => {
       if (!res.length) {
-        throw new Error(
-          'Sorry, there are no images matching your search query. Please try again!'
-        );
+        clearGallery();
+        return iziToast.info({
+          icon: '',
+          position: 'topRight',
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+          timeout: 5000,
+          progressBar: false,
+          close: false,
+          messageColor: 'white',
+        });
       }
-
       createGallery(res);
+      e.target.reset();
     })
     .catch(error => {
-      console.log('error');
+      clearGallery();
 
       return iziToast.error({
         icon: '',
         position: 'topRight',
-        message: error.message,
+        message:
+          error.message || 'Something went wrong. Please try again later.',
 
         timeout: 5000,
         progressBar: false,
@@ -59,5 +63,7 @@ function formSubmit(e) {
         messageColor: 'white',
       });
     })
-    .finally(() => hideLoader(), e.target.reset());
+    .finally(() => {
+      hideLoader();
+    });
 }
